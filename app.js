@@ -1,12 +1,15 @@
 const express = require('express');
+require('dotenv').config();
 
 const bodyParser = require('body-parser');
+
 
 const mongoose = require('mongoose');
 
 const authRoutes = require('./routes/auth');
+const quizRoutes = require('./routes/quiz');
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8080;
 const MONGODB_URI =
   "mongodb+srv://clumpiness:r1fbR7A327xczldH@cluster0.qcwuzp2.mongodb.net/quizzer?retryWrites=true&w=majority&appName=Cluster0";
 
@@ -27,6 +30,8 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 
 app.use('/auth', authRoutes);
+
+app.use('/quiz', quizRoutes);
 
 // err  handler
 app.use((error, req, res, next) => {

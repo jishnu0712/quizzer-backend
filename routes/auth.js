@@ -6,13 +6,24 @@ const authController = require('../controllers/auth');
 
 const router = express.Router();
 
-router.get('/login', (req, res, next) => {
-    res.status(200).json({ message: 'All ok kid!' });
-});
+// POST /auth/login
+router.post('/login', [
+    body('email').isEmail().withMessage('Please enter a valid email').normalizeEmail(),
+    body('password').isLength({ min: 3 })
+], authController.login);
 
 // POST /auth/signup
 router.post('/signup', [
     body('email').isEmail().withMessage('Please enter a valid email').normalizeEmail(),
+    body('password').isLength({ min: 3 })
 ], authController.signup);
+
+// POST /auth/reset
+router.post('/reset', [
+    body('email').isEmail().withMessage('Please enter a valid email').normalizeEmail()
+], authController.sendResetEmail);
+
+// GET /auth/reset
+router.post('/reset/:token', authController.resetPassword);
 
 module.exports = router;
