@@ -112,7 +112,7 @@ exports.sendResetEmail = async (req, res, next) => {
             [email],
             "Quiz O Pedia - Reset Link",
             `<h1>You requested a password reset</h1>
-            Click this <a href="http://localhost:8080/auth/reset/${token}">link</a> to set a password.
+            Click this <a href="http://localhost:3000/auth/reset/${token}">link</a> to set a password.
            `,
             (cc = ["clumpiness@gmail.com"]),
             (bcc = [])
