@@ -8,14 +8,12 @@ const quizController = require('../controllers/quiz');
 const router = express.Router();
 
 // GET /quiz/
-router.get('/', isAuth, (req, res, next) => {
-    res.status(200).json({ data: 'user authenticated' });
-});
+router.get('/', quizController.getQuiz);
 
 router.post('/', isAuth, [
     body('question').trim().isLength({ min: 3}),
-    body('answer').not().isEmpty(),
-    body('options').not().isEmpty(),
+    body('correct_answer').not().isEmpty(),
+    body('incorrect_answers').not().isEmpty(),
 ], quizController.postQuiz);
 
 module.exports = router;

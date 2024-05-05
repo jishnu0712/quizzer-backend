@@ -6,11 +6,20 @@ const quizSchema = new Schema({
         type: String,
         required: true,    
     },
-    answer: { 
+    category: { 
+        type: String,
+    },
+    difficulty: {
+        type: String,
+    },
+    topic: { 
+        type: String,
+    },
+    correct_answer: { 
         type: String,
         required: true,    
     },
-    options: {
+    incorrect_answers: {
         type: [String],
         required: true,
     },
