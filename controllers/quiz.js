@@ -1,5 +1,8 @@
 const Quiz = require('../models/quiz');
 
+const xlsx = require('xlsx');
+
+
 const { validationResult } = require('express-validator');
 
 const User = require('../models/user');
@@ -85,5 +88,27 @@ exports.getQuiz = async (req, res, next) => {
             err.statusCode = 500;
         }
         next(err);
+    }
+}
+
+exports.postQuizExcel = async (req, res, next) => {
+    try {
+        const workbook = xlsx.readFile("./quiz.xlsx");
+        // Assuming you have one sheet, or you can specify the sheet name
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        // Convert sheet to JSON object
+        const jsonData = xlsx.utils.sheet_to_json(sheet);
+    
+        console.log(jsonData);
+        // for each row in the sheet
+        // validate the row
+        // save the row
+        res.status(200).json(jsonData);
+    } catch (e) {
+        if (!e.statusCode) {
+            e.statusCode = 500;
+        }
+        next(e);
     }
 }
