@@ -10,7 +10,7 @@ const router = express.Router();
 // GET /quiz/
 router.get('/', quizController.getQuiz);
 
-router.get("/excel", quizController.postQuizExcel);
+router.get("/excel", isAuth, quizController.postQuizExcel);
 
 router.post('/', isAuth, [
     body('question').trim().isLength({ min: 3}),

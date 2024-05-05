@@ -93,7 +93,7 @@ exports.getQuiz = async (req, res, next) => {
 
 exports.postQuizExcel = async (req, res, next) => {
     try {
-        const workbook = xlsx.readFile("./quiz.xlsx");
+        const workbook = xlsx.readFile("./quizzes.xlsx");
         // Assuming you have one sheet, or you can specify the sheet name
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
@@ -103,12 +103,53 @@ exports.postQuizExcel = async (req, res, next) => {
         console.log(jsonData);
         // for each row in the sheet
         // validate the row
-        // save the row
-        res.status(200).json(jsonData);
+        const validationErrors = validateData(jsonData);
+        if (validationErrors.length > 0) {
+            console.log('Validation errors:');
+            validationErrors.forEach(error => console.log(error));
+            return res.status(422).json({data: validationErrors});
+        } else {
+            console.log('Data validation successful!');
+            // save the row
+            jsonData.forEach(async (row, index) => {
+                const newData = new Quiz({...row, creator: req.userId.toString()});
+                await newData.save();
+                console.log(`Row ${index + 2} saved successfully.`);
+            })
+            // save the row
+            res.status(200).json({message: "Quizzes saved successfully."});
+        }
     } catch (e) {
         if (!e.statusCode) {
             e.statusCode = 500;
         }
         next(e);
     }
+}
+
+function validateData(data) {
+    const errors = [];
+
+    // Example validation: check if 'Name' field is empty
+    data.forEach((row, index) => {
+        if (!row.question) {
+            errors.push(`Row ${index + 2}: 'question' field is empty.`);
+        }
+        if (!row.correct_answer) {
+            errors.push(`Row ${index + 2}: 'correct_answer' field is empty.`);
+        }
+        if (!row.topic) {
+            errors.push(`Row ${index + 2}: 'topic' field is empty.`);
+        }
+        if (!row.incorrect_answers) {
+            errors.push(`Row ${index + 2}: 'incorrect_answers' field is empty.`);
+        }
+        if (row.incorrect_answers)
+            if (row.incorrect_answers.split(',').length < 1 || row.incorrect_answers.split(',').length > 4) {
+            errors.push(`Row ${index + 2}: 'incorrect_answers' field should contain atleat 1 or atmost 4 choice.`);
+        }
+        // Add more validation checks as needed
+    });
+
+    return errors;
 }
