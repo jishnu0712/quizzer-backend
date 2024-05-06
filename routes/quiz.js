@@ -5,12 +5,14 @@ const { body } = require('express-validator');
 
 const quizController = require('../controllers/quiz');
 
+const upload = require("../utils/multerConfig");
+
 const router = express.Router();
 
 // GET /quiz/
 router.get('/', quizController.getQuiz);
 
-router.get("/excel", isAuth, quizController.postQuizExcel);
+router.post("/excel", isAuth, upload.single('xlsx'), quizController.postQuizExcel);
 
 router.post('/', isAuth, [
     body('question').trim().isLength({ min: 3}),

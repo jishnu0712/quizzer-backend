@@ -2,10 +2,12 @@ const Quiz = require('../models/quiz');
 
 const xlsx = require('xlsx');
 
+const upload = require("../utils/multerConfig");
 
 const { validationResult } = require('express-validator');
 
 const User = require('../models/user');
+const deleteUploadedFile = require('../utils/deleteFile');
 
 exports.postQuiz = async (req, res, next) => {
     
@@ -93,7 +95,14 @@ exports.getQuiz = async (req, res, next) => {
 
 exports.postQuizExcel = async (req, res, next) => {
     try {
-        const workbook = xlsx.readFile("./quizzes.xlsx");
+        if (!req.file) {
+            return res.status(400).send('No file uploaded.');
+        }
+    
+        // Access the uploaded file details
+        const { originalname, path } = req.file;
+
+        const workbook = xlsx.readFile(path);
         // Assuming you have one sheet, or you can specify the sheet name
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
@@ -107,17 +116,23 @@ exports.postQuizExcel = async (req, res, next) => {
         if (validationErrors.length > 0) {
             console.log('Validation errors:');
             validationErrors.forEach(error => console.log(error));
+            deleteUploadedFile(path);
             return res.status(422).json({data: validationErrors});
         } else {
             console.log('Data validation successful!');
             // save the row
             jsonData.forEach(async (row, index) => {
-                const newData = new Quiz({...row, creator: req.userId.toString()});
+                const newData = new Quiz({
+                    ...row,
+                    creator: req.userId.toString(),
+                    incorrect_answers: row.incorrect_answers.split(',').map(item => item.trim())
+                });
                 await newData.save();
                 console.log(`Row ${index + 2} saved successfully.`);
             })
             // save the row
             res.status(200).json({message: "Quizzes saved successfully."});
+            deleteUploadedFile(path);
         }
     } catch (e) {
         if (!e.statusCode) {
