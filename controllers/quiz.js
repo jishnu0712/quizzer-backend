@@ -59,17 +59,20 @@ exports.postQuiz = async (req, res, next) => {
 exports.getQuiz = async (req, res, next) => {
     const amount = req.query.amount || 5;
     const topic = req.query.topic || 'any';
+    const page = req.query.page || 1;
 
     try {
         // randomize fetch
+        const noOfQuiz = await Quiz.countDocuments();
+
         let quizzes = await Quiz.find()
             .populate({
                 path: 'creator',
                 select: 'name -_id'
             })
             .select("question correct_answer incorrect_answers -_id")
+            .skip((page - 1) * amount)
             .limit(amount);
-    
         // randomize answers
         quizzes = quizzes.map(quiz => ({
             ...quiz._doc,
@@ -82,6 +85,7 @@ exports.getQuiz = async (req, res, next) => {
         res.status(200).json({
             response_code: 0,
             message: 'Quiz fetched successfully.',
+            noOfQuiz: noOfQuiz,
             results: quizzes,
         });
 

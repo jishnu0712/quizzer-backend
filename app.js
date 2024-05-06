@@ -10,9 +10,6 @@ const authRoutes = require('./routes/auth');
 const quizRoutes = require('./routes/quiz');
 
 const PORT = process.env.PORT || 8080;
-const MONGODB_URI =
-  "mongodb+srv://clumpiness:r1fbR7A327xczldH@cluster0.qcwuzp2.mongodb.net/quizzer?retryWrites=true&w=majority&appName=Cluster0";
-
 
 
 const app = express();
@@ -43,7 +40,7 @@ app.use((error, req, res, next) => {
 });
 
 mongoose
-  .connect(MONGODB_URI)
+  .connect(process.env.MONGODB_URI)
   .then((result) => {
     app.listen(PORT, () => console.log(`server started at ${PORT}`));
   })

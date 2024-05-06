@@ -12,6 +12,7 @@ const router = express.Router();
 // GET /quiz/
 router.get('/', quizController.getQuiz);
 
+// POST /quiz/excel/
 router.post("/excel", isAuth, upload.single('xlsx'), quizController.postQuizExcel);
 
 router.post('/', isAuth, [
