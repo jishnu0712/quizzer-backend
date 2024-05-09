@@ -2,8 +2,6 @@ const Quiz = require('../models/quiz');
 
 const xlsx = require('xlsx');
 
-const upload = require("../utils/multerConfig");
-
 const { validationResult } = require('express-validator');
 
 const User = require('../models/user');
@@ -99,6 +97,25 @@ exports.getQuiz = async (req, res, next) => {
 
 exports.postQuizExcel = async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const error = new Error("Validation failed");
+            error.statusCode = 422;
+            error.data = errors.array();
+            deleteUploadedFile(path);
+            throw error;
+        }
+
+        const { examId } = req.body;
+        const quiz = await Quiz.find({ examId: examId });
+
+        if (quiz.length > 0) {
+            const err = new Error('Exam already created.');
+            err.statusCode = 404;
+            deleteUploadedFile(path);
+            throw err;
+        }
+
         if (!req.file) {
             return res.status(400).send('No file uploaded.');
         }
@@ -112,8 +129,6 @@ exports.postQuizExcel = async (req, res, next) => {
         const sheet = workbook.Sheets[sheetName];
         // Convert sheet to JSON object
         const jsonData = xlsx.utils.sheet_to_json(sheet);
-    
-        console.log(jsonData);
         // for each row in the sheet
         // validate the row
         const validationErrors = validateData(jsonData);
@@ -128,6 +143,7 @@ exports.postQuizExcel = async (req, res, next) => {
             jsonData.forEach(async (row, index) => {
                 const newData = new Quiz({
                     ...row,
+                    examId: examId,
                     creator: req.userId.toString(),
                     incorrect_answers: row.incorrect_answers.split(',').map(item => item.trim())
                 });

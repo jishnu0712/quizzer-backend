@@ -9,6 +9,10 @@ const quizSchema = new Schema({
     category: { 
         type: String,
     },
+    examId: { 
+        type: String,
+        required: true,
+    },
     difficulty: {
         type: String,
     },

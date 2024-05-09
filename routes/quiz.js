@@ -13,7 +13,9 @@ const router = express.Router();
 router.get('/', quizController.getQuiz);
 
 // POST /quiz/excel/
-router.post("/excel", isAuth, upload.single('xlsx'), quizController.postQuizExcel);
+router.post("/excel", isAuth, upload.single('xlsx'),[
+    body('examId').trim().isLength({ min: 3 }),
+], quizController.postQuizExcel);
 
 router.post('/', isAuth, [
     body('question').trim().isLength({ min: 3}),
