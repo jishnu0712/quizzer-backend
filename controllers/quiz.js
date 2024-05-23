@@ -97,6 +97,8 @@ exports.getQuiz = async (req, res, next) => {
 
 exports.postQuizExcel = async (req, res, next) => {
     try {
+        // Access the uploaded file details
+        const { originalname, path } = req.file;
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             const error = new Error("Validation failed");
@@ -120,8 +122,6 @@ exports.postQuizExcel = async (req, res, next) => {
             return res.status(400).send('No file uploaded.');
         }
     
-        // Access the uploaded file details
-        const { originalname, path } = req.file;
 
         const workbook = xlsx.readFile(path);
         // Assuming you have one sheet, or you can specify the sheet name
@@ -162,6 +162,28 @@ exports.postQuizExcel = async (req, res, next) => {
     }
 }
 
+exports.updatePoints = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) {
+            const err = new Error('User not found.');
+            err.statusCode = 404;
+            throw err;
+        }
+    
+        const { points } = req.body;
+        user.points = {...user.points, earnedPoints: points};
+
+        await user.save();
+        res.status(200).json({message: "Points updated successfully.", score: points});
+    } catch (e) {
+        if (!e.statusCode) {
+            e.statusCode = 500;
+        }
+        next(e);
+    }
+    
+};
 function validateData(data) {
     const errors = [];
 

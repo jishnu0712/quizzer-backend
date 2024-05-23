@@ -23,4 +23,7 @@ router.post('/', isAuth, [
     body('incorrect_answers').not().isEmpty(),
 ], quizController.postQuiz);
 
+// POST /quiz/update-points
+router.post('/update-points', isAuth, quizController.updatePoints);
+
 module.exports = router;
